@@ -1,34 +1,69 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Dashboard Utilisateur</title>
+    <title>Dashboard Utilisateur - TicketFile</title>
+    @vite('resources/css/app.css')
 </head>
-<body>
+<body class="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 text-gray-800">
+    <div class="min-h-screen">
+        <header class="border-b border-white/60 bg-white/70 backdrop-blur shadow-sm">
+            <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+                <div>
+                    <p class="text-sm font-medium text-indigo-600">TicketFile</p>
+                    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Dashboard Utilisateur</h1>
+                </div>
 
-<h1>Dashboard Utilisateur</h1>
-<p>Bienvenue {{ Auth::user()->name }} (Usager)</p>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700"
+                    >
+                        Déconnexion
+                    </button>
+                </form>
+            </div>
+        </header>
 
-<nav>
-    <ul>
-{{--        <li><a href="{{ route('dashboard') }}">Accueil</a></li>--}}
-        <li><a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Déconnexion</a></li>
-    </ul>
-</nav>
+        <main class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+            <div class="grid gap-6 lg:grid-cols-[2fr_1fr]">
+                <section class="rounded-2xl bg-white p-8 shadow-xl ring-1 ring-gray-200">
+                    <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Rôle : Usager</span>
+                    <h2 class="mt-4 text-3xl font-bold text-gray-900">Bienvenue {{ Auth::user()->name }}</h2>
+                    <p class="mt-3 text-gray-600">
+                        Vous accédez à votre espace personnel pour suivre vos demandes et consulter vos informations.
+                    </p>
 
-<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-    @csrf
-</form>
+                    <div class="mt-8 grid gap-4 sm:grid-cols-2">
+                        <div class="rounded-xl bg-indigo-50 p-4">
+                            <p class="text-sm text-indigo-700">Mes demandes</p>
+                            <p class="mt-1 text-2xl font-bold text-indigo-900">—</p>
+                        </div>
+                        <div class="rounded-xl bg-emerald-50 p-4">
+                            <p class="text-sm text-emerald-700">Demandes en cours</p>
+                            <p class="mt-1 text-2xl font-bold text-emerald-900">—</p>
+                        </div>
+                    </div>
+                </section>
 
-<!-- Contenu usager ici -->
-<section>
-    <h2>Mon espace</h2>
-    <p>Vous accédez à votre espace personnel.</p>
-</section>
-
+                <aside class="rounded-2xl bg-gray-900 p-6 text-white shadow-xl">
+                    <h3 class="text-lg font-semibold">Mon espace</h3>
+                    <p class="mt-2 text-sm text-gray-300">
+                        Suivez vos tickets et vos échanges avec l’équipe.
+                    </p>
+                    <div class="mt-5 space-y-3 text-sm text-gray-200">
+                        <div class="rounded-lg bg-white/10 px-4 py-3">Créer une nouvelle demande</div>
+                        <div class="rounded-lg bg-white/10 px-4 py-3">Consulter l’historique</div>
+                        <div class="rounded-lg bg-white/10 px-4 py-3">Modifier mon profil</div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
 </body>
 </html>
 
