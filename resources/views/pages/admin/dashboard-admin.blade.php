@@ -10,22 +10,14 @@
 </head>
 <body class="min-h-screen bg-linear-to-br from-slate-50 via-indigo-50 to-blue-100 text-gray-800">
     <div class="min-h-screen">
-        <header class="border-b border-white/60 bg-white/70 backdrop-blur shadow-sm">
+        <header class="border-b border-gray-200 bg-white/90 backdrop-blur shadow-sm">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                 <div>
-                    <p class="text-sm font-medium text-indigo-600">TicketFile</p>
+                    <p class="text-sm font-medium text-indigo-700">TicketFile</p>
                     <h1 class="text-2xl font-bold tracking-tight text-gray-900">Dashboard Admin</h1>
                 </div>
 
-                <form id="logout-form" action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button
-                        type="submit"
-                        class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700"
-                    >
-                        Déconnexion
-                    </button>
-                </form>
+                <x-logout-button id="logout-form">Déconnexion</x-logout-button>
             </div>
         </header>
 
@@ -34,7 +26,7 @@
                 <section class="rounded-2xl bg-white p-8 shadow-xl ring-1 ring-gray-200">
                     <span class="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">Rôle : Administrateur</span>
                     <h2 class="mt-4 text-3xl font-bold text-gray-900">Bienvenue {{ Auth::user()->name }}</h2>
-                    <p class="mt-3 max-w-2xl text-gray-600">
+                    <p class="mt-3 max-w-2xl text-gray-700">
                         Vous avez accès à la gestion complète du système, à la supervision des utilisateurs et au suivi des tickets.
                     </p>
 
@@ -54,12 +46,12 @@
                     </div>
                 </section>
 
-                <aside class="rounded-2xl bg-gray-900 p-6 text-white shadow-xl">
+                <aside class="rounded-2xl bg-white p-6 text-slate-900 shadow-xl ring-1 ring-gray-200">
                     <h3 class="text-lg font-semibold">Actions rapides</h3>
-                    <ul class="mt-4 space-y-3 text-sm text-gray-300">
-                        <li class="rounded-lg bg-white/10 px-4 py-3">Gérer les utilisateurs</li>
-                        <li class="rounded-lg bg-white/10 px-4 py-3">Consulter les tickets</li>
-                        <li class="rounded-lg bg-white/10 px-4 py-3">Configurer les services</li>
+                    <ul class="mt-4 space-y-3 text-sm text-gray-800">
+                        <li class="rounded-lg bg-slate-100 px-4 py-3 transition hover:bg-slate-200">Gérer les utilisateurs</li>
+                        <li class="rounded-lg bg-slate-100 px-4 py-3 transition hover:bg-slate-200">Consulter les tickets</li>
+                        <li class="rounded-lg bg-slate-100 px-4 py-3 transition hover:bg-slate-200">Configurer les services</li>
                     </ul>
                 </aside>
             </div>
