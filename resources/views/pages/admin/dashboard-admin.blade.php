@@ -30,6 +30,7 @@
                         Vous avez accès à la gestion complète du système, à la supervision des utilisateurs et au suivi des tickets.
                     </p>
 
+
                     <div class="mt-8 grid gap-4 sm:grid-cols-3">
                         <div class="rounded-xl bg-indigo-50 p-4">
                             <p class="text-sm text-indigo-700">Utilisateurs</p>
