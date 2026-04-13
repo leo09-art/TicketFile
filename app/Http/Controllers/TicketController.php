@@ -2,64 +2,60 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Counter;
+use App\Models\Service;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TicketController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $services = Service::active()->get();
+        return view('tickets.create', compact('services'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'service_id' => 'required|exists:services,id',
+        ]);
+
+        $ticket = Ticket::create([
+            'ticket_number' => Ticket::generateTicketNumber(),
+            'service_id' => $request->service_id,
+            'user_id' => Auth::check() ? Auth::id() : null,
+            'status' => Ticket::STATUS_EN_ATTENTE,
+        ]);
+
+        return redirect()->route('tickets.show', $ticket);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Ticket $ticket)
     {
-        //
+        if (Auth::check() && Auth::user()->role !== 'admin' && $ticket->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $position = $ticket->getPositionInQueue();
+        $service = $ticket->service;
+
+        return view('tickets.show', compact('ticket', 'position', 'service'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Ticket $ticket)
+    public function updateStatus(Request $request, Ticket $ticket)
     {
-        //
-    }
+        $request->validate([
+            'status' => 'required|in:en_attente,appele,traite,absent,annule',
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Ticket $ticket)
-    {
-        //
-    }
+        $ticket->update([
+            'status' => $request->status,
+            'called_at' => $request->status === Ticket::STATUS_APPELLE ? now() : $ticket->called_at,
+            'treated_at' => $request->status === Ticket::STATUS_TRAITE ? now() : $ticket->treated_at,
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Ticket $ticket)
-    {
-        //
+        return redirect()->back()->with('success', 'Statut mis à jour');
     }
 }
