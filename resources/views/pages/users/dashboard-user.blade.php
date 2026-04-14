@@ -47,10 +47,10 @@
                     <p class="mt-2 text-sm text-gray-700">
                         Suivez vos tickets et vos échanges avec l’équipe.
                     </p>
-                    <div class="mt-5 space-y-3 text-sm text-gray-800">
-                        <div class="rounded-lg bg-slate-100 px-4 py-3 transition hover:bg-slate-200">Créer une nouvelle demande</div>
-                        <div class="rounded-lg bg-slate-100 px-4 py-3 transition hover:bg-slate-200">Consulter l’historique</div>
-                        <div class="rounded-lg bg-slate-100 px-4 py-3 transition hover:bg-slate-200">Modifier mon profil</div>
+<div class="mt-5 space-y-3 text-sm text-gray-200">
+                        <a href="{{ route('tickets.create') }}" class="block rounded-lg bg-white/10 px-4 py-3 hover:bg-white/20">Créer une nouvelle demande</a>
+                        <a href="#" class="block rounded-lg bg-white/10 px-4 py-3 hover:bg-white/20">Consulter lhistorique</a>
+                        <a href="#" class="block rounded-lg bg-white/10 px-4 py-3 hover:bg-white/20">Modifier mon profil</a>
                     </div>
                 </aside>
             </div>
