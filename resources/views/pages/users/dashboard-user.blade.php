@@ -8,24 +8,16 @@
     <title>Dashboard Utilisateur - TicketFile</title>
     @vite('resources/css/app.css')
 </head>
-<body class="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 text-gray-800">
+<body class="min-h-screen bg-linear-to-br from-slate-50 via-indigo-50 to-blue-100 text-gray-800">
     <div class="min-h-screen">
-        <header class="border-b border-white/60 bg-white/70 backdrop-blur shadow-sm">
+        <header class="border-b border-gray-200 bg-white/90 backdrop-blur shadow-sm">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                 <div>
-                    <p class="text-sm font-medium text-indigo-600">TicketFile</p>
+                    <p class="text-sm font-medium text-indigo-700">TicketFile</p>
                     <h1 class="text-2xl font-bold tracking-tight text-gray-900">Dashboard Utilisateur</h1>
                 </div>
 
-                <form id="logout-form" action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button
-                        type="submit"
-                        class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700"
-                    >
-                        Déconnexion
-                    </button>
-                </form>
+                <x-logout-button id="logout-form">Déconnexion</x-logout-button>
             </div>
         </header>
 
@@ -34,7 +26,7 @@
                 <section class="rounded-2xl bg-white p-8 shadow-xl ring-1 ring-gray-200">
                     <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Rôle : Usager</span>
                     <h2 class="mt-4 text-3xl font-bold text-gray-900">Bienvenue {{ Auth::user()->name }}</h2>
-                    <p class="mt-3 text-gray-600">
+                    <p class="mt-3 text-gray-700">
                         Vous accédez à votre espace personnel pour suivre vos demandes et consulter vos informations.
                     </p>
 
@@ -50,9 +42,9 @@
                     </div>
                 </section>
 
-                <aside class="rounded-2xl bg-gray-900 p-6 text-white shadow-xl">
+                <aside class="rounded-2xl bg-white p-6 text-slate-900 shadow-xl ring-1 ring-gray-200">
                     <h3 class="text-lg font-semibold">Mon espace</h3>
-                    <p class="mt-2 text-sm text-gray-300">
+                    <p class="mt-2 text-sm text-gray-700">
                         Suivez vos tickets et vos échanges avec l’équipe.
                     </p>
 <div class="mt-5 space-y-3 text-sm text-gray-200">
