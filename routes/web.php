@@ -16,6 +16,9 @@ Route::post('/login',[AuthController::class,"authenticate"])->name("login.authen
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/register', [AuthController::class, 'store'])->name('register.store');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/admin/create-account', [AuthController::class, 'adminCreateAccount'])
+    ->middleware('auth')
+    ->name('admin.accounts.create');
 
 // Tickets (Usager) - Sans authentification
 Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
