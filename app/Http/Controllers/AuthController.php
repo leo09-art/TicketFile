@@ -43,16 +43,31 @@ class AuthController extends Controller
         return view('login.register');
     }
 
+    public function adminCreateAccount()
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return response()->view('pages.error.denied-page', [], 403);
+        }
+
+        return view('components.creer_all_compte');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'confirmed'],
-//            'role' => ['required', 'string'],
+            'role' => ['nullable', 'in:usager,agent,admin'],
         ]);
 
+        $validated['role'] = $validated['role'] ?? 'usager';
+
         User::create($validated);
+
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return redirect()->route('dashboard.admin')->with('success', 'Compte cree avec succes.');
+        }
 
         return redirect()->route('login')->with('success', 'Compte cree avec succes.');
     }

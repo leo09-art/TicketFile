@@ -49,6 +49,12 @@
 
                 <aside class="rounded-2xl bg-white p-6 text-slate-900 shadow-xl ring-1 ring-gray-200">
                     <h3 class="text-lg font-semibold">Actions rapides</h3>
+                    <a
+                        href="{{ route('admin.accounts.create') }}"
+                        class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                        Creer un compte
+                    </a>
                     <ul class="mt-4 space-y-3 text-sm text-gray-800">
                         <li class="rounded-lg bg-slate-100 px-4 py-3 transition hover:bg-slate-200">Gérer les utilisateurs</li>
                         <li class="rounded-lg bg-slate-100 px-4 py-3 transition hover:bg-slate-200">Consulter les tickets</li>
