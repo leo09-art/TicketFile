@@ -37,10 +37,20 @@ php artisan key:generate
 npm install
 ```
 
-5. Préparer la base de données SQLite et lancer les migrations :
+5. Préparer la base de données SQLite, lancer les migrations et les seeders :
 
 ```bash
 php artisan migrate
+php artisan db:seed
+```
+
+## Identifiants admin par défaut
+
+Après `php artisan db:seed`, un compte administrateur par défaut est disponible avec :
+
+```text
+Email : admin@ticketfile.test
+Mot de passe : admin12345
 ```
 
 6. Démarrer l’application :
