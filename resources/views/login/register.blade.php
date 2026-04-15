@@ -90,23 +90,23 @@
                     @enderror
                 </div>
 
-                <div class="mb-6">
-                    <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
-                    <select
-                        name="role"
-                        id="role"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-white cursor-pointer"
-                        required
-                    >
-                        <option value="">-- Sélectionner un rôle --</option>
-                        <option value="agent">Agent</option>
-                        <option value="usager">Usager</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                    @error('role')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+{{--                <div class="mb-6">--}}
+{{--                    <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Rôle</label>--}}
+{{--                    <select--}}
+{{--                        name="role"--}}
+{{--                        id="role"--}}
+{{--                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-white cursor-pointer"--}}
+{{--                        required--}}
+{{--                    >--}}
+{{--                        <option value="">-- Sélectionner un rôle --</option>--}}
+{{--                        <option value="usager">Usager</option>--}}
+{{--                        <option value="agent">Agent</option>--}}
+{{--                        <option value="admin">Admin</option>--}}
+{{--                    </select>--}}
+{{--                    @error('role')--}}
+{{--                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>--}}
+{{--                    @enderror--}}
+{{--                </div>--}}
 
                 <button
                     type="submit"
