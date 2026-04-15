@@ -49,7 +49,7 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:login,email'],
             'password' => ['required', 'string', 'confirmed'],
-            'role' => ['required', 'string'],
+//            'role' => ['required', 'string'],
         ]);
 
         User::create($validated);
