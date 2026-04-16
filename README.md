@@ -40,9 +40,10 @@ npm install
 5. Préparer la base de données SQLite, lancer les migrations et les seeders :
 
 ```bash
-php artisan migrate
-php artisan db:seed
+php artisan migrate:fresh --seed
 ```
+
+> Le projet utilise la table standard Laravel `users` pour l'authentification.
 
 ## Identifiants admin par défaut
 

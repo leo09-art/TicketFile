@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->integer('ticket_number');
             $table->foreignId('service_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->nullable()->constrained('login')->onDelete('set null');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('counter_id')->nullable()->constrained()->onDelete('set null');
             $table->enum('status', ['en_attente', 'appele', 'traite', 'absent', 'annule'])->default('en_attente');
             $table->timestamp('called_at')->nullable();
