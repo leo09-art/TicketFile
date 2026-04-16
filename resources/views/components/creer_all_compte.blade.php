@@ -132,7 +132,7 @@
                 type="submit"
                 class="w-full mb-5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105"
             >
-                S'inscrire
+                Creer le compte
             </button>
             <button
                 type="reset"

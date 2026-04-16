@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('service_id')->constrained()->onDelete('cascade');
-            $table->foreignId('agent_user_id')->nullable()->constrained('login')->onDelete('set null');
+            $table->foreignId('agent_user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }
