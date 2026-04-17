@@ -9,7 +9,7 @@ Application Laravel pour la gestion de tickets.
 - Node.js et npm
 - SQLite
 
-## Démarrer le projet
+## Démarrer le projet (du clonage à l'execution)
 
 1. Cloner le dépôt :
 
@@ -37,29 +37,30 @@ php artisan key:generate
 npm install
 ```
 
-5. Préparer la base de données SQLite, lancer les migrations et les seeders :
+5. Preparer la base de donnees SQLite, lancer les migrations et les seeders :
 
 ```bash
-php artisan migrate
-php artisan db:seed
+php artisan migrate --seed
 ```
 
-## Identifiants admin par défaut
+## Identifiants admin par defaut
 
-Après `php artisan db:seed`, un compte administrateur par défaut est disponible avec :
+Apres `php artisan migrate --seed`, un compte administrateur par defaut est disponible avec :
 
 ```text
 Email : admin@ticketfile.test
 Mot de passe : admin12345
 ```
 
-6. Démarrer l’application :
+6. Demarrer l'application :
 
 ```bash
-php artisan serve
+php artisan
 ```
 
-7. Dans un deuxième terminal, lancer Vite :
+`php artisan` sans argument demarre automatiquement le serveur Laravel (`serve`).
+
+7. Optionnel (si vous modifiez les styles/scripts), dans un deuxieme terminal lancer Vite :
 
 ```bash
 npm run dev
