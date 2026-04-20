@@ -19,7 +19,17 @@ class CheckRole
             return $next($request);
         }
 
-        return redirect('/dashboard')->with('error', 'Accès non autorisé.');
+        // Rediriger vers le bon dashboard selon le rôle
+        if (auth()->check()) {
+            return match(auth()->user()->role) {
+                'admin'  => redirect()->route('admin.dashboard'),
+                'agent'  => redirect()->route('agent.dashboard'),
+                'usager' => redirect()->route('usager.dashboard'),
+                default  => redirect()->route('login'),
+            };
+        }
+
+        return redirect()->route('login');
     }
 }
 

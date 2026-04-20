@@ -1,61 +1,93 @@
-<!doctype html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Dashboard Utilisateur - TicketFile</title>
-    @vite('resources/css/app.css')
-</head>
-<body class="min-h-screen bg-linear-to-br from-slate-50 via-indigo-50 to-blue-100 text-gray-800">
-    <div class="min-h-screen">
-        <header class="border-b border-gray-200 bg-white/90 backdrop-blur shadow-sm">
-            <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                <div>
-                    <p class="text-sm font-medium text-indigo-700">TicketFile</p>
-                    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Dashboard Utilisateur</h1>
-                </div>
+﻿@extends('layouts.app')
+@section('title', 'Accueil — TicketFile')
 
-                <x-logout-button id="logout-form">Déconnexion</x-logout-button>
-            </div>
-        </header>
+@section('page-header')
+<div>
+    <p class="text-xs font-semibold text-indigo-500 uppercase tracking-widest mb-1">Usager</p>
+    <h1 class="text-2xl font-black text-gray-900 dark:text-white">Bonjour, {{ Auth::user()->name }} 👋</h1>
+</div>
+@endsection
 
-        <main class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-            <div class="grid gap-6 lg:grid-cols-[2fr_1fr]">
-                <section class="rounded-2xl bg-white p-8 shadow-xl ring-1 ring-gray-200">
-                    <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Rôle : Usager</span>
-                    <h2 class="mt-4 text-3xl font-bold text-gray-900">Bienvenue {{ Auth::user()->name }}</h2>
-                    <p class="mt-3 text-gray-700">
-                        Vous accédez à votre espace personnel pour suivre vos demandes et consulter vos informations.
-                    </p>
+@section('content')
 
-                    <div class="mt-8 grid gap-4 sm:grid-cols-2">
-                        <div class="rounded-xl bg-indigo-50 p-4">
-                            <p class="text-sm text-indigo-700">Mes demandes</p>
-                            <p class="mt-1 text-2xl font-bold text-indigo-900">—</p>
-                        </div>
-                        <div class="rounded-xl bg-emerald-50 p-4">
-                            <p class="text-sm text-emerald-700">Demandes en cours</p>
-                            <p class="mt-1 text-2xl font-bold text-emerald-900">—</p>
-                        </div>
-                    </div>
-                </section>
+@if(session('success'))
+<div class="mb-5 flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
+    ✅ {{ session('success') }}
+</div>
+@endif
 
-                <aside class="rounded-2xl bg-white p-6 text-slate-900 shadow-xl ring-1 ring-gray-200">
-                    <h3 class="text-lg font-semibold">Mon espace</h3>
-                    <p class="mt-2 text-sm text-gray-700">
-                        Suivez vos tickets et vos échanges avec l’équipe.
-                    </p>
-<div class="mt-5 space-y-3 text-sm text-gray-200">
-                        <a href="{{ route('tickets.create') }}" class="block rounded-lg bg-white/10 px-4 py-3 hover:bg-white/20">Créer une nouvelle demande</a>
-                        <a href="#" class="block rounded-lg bg-white/10 px-4 py-3 hover:bg-white/20">Consulter lhistorique</a>
-                        <a href="#" class="block rounded-lg bg-white/10 px-4 py-3 hover:bg-white/20">Modifier mon profil</a>
-                    </div>
-                </aside>
-            </div>
-        </main>
+@if(session('error'))
+<div class="mb-5 flex items-center gap-2 rounded-xl bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+    ❌ {{ session('error') }}
+</div>
+@endif
+
+@if($myTicket)
+<div class="mb-6 bg-indigo-600 rounded-2xl p-6 text-white flex items-center justify-between gap-4 flex-wrap">
+    <div>
+        <p class="text-xs font-semibold text-indigo-300 uppercase tracking-widest mb-1">Votre ticket actif</p>
+        <p class="text-5xl font-black leading-none">#{{ str_pad($myTicket->ticket_number, 3, '0', STR_PAD_LEFT) }}</p>
+        <p class="text-sm text-indigo-200 mt-2">{{ $myTicket->service->name }}</p>
     </div>
-</body>
-</html>
+    <div class="flex flex-col gap-2">
+        <a href="{{ route('usager.ticket', $myTicket->id) }}"
+           class="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold text-sm px-4 py-2.5 rounded-xl hover:bg-indigo-50 transition">
+            👁️ Suivre mon ticket
+        </a>
+        <form action="{{ route('usager.ticket.cancel', $myTicket->id) }}" method="POST">
+            @csrf @method('PATCH')
+            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-indigo-700 hover:bg-indigo-800 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition">
+                ✖ Annuler
+            </button>
+        </form>
+    </div>
+</div>
+@endif
 
+<div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm ring-1 ring-gray-200 dark:ring-gray-800 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+        <h2 class="font-bold text-gray-900 dark:text-white">Services disponibles</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Choisissez un service pour prendre un ticket</p>
+    </div>
+
+    @if($services->isEmpty())
+    <div class="py-12 text-center">
+        <p class="text-3xl mb-2">😔</p>
+        <p class="text-sm text-gray-400">Aucun service disponible pour le moment.</p>
+    </div>
+    @else
+    <div class="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3">
+        @foreach($services as $service)
+        <div class="rounded-xl border border-gray-100 dark:border-gray-800 bg-slate-50 dark:bg-gray-800/50 p-5 flex flex-col gap-4">
+            <div>
+                <p class="font-bold text-gray-900 dark:text-white">{{ $service->name }}</p>
+                @if($service->description)
+                <p class="text-xs text-gray-400 mt-1">{{ $service->description }}</p>
+                @endif
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    <span class="inline-flex items-center gap-1">
+                        <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+                        {{ $service->waiting }} en attente
+                    </span>
+                </p>
+            </div>
+            @if($myTicket)
+            <button disabled class="w-full bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 font-semibold text-sm py-2.5 rounded-xl cursor-not-allowed">
+                Ticket déjà actif
+            </button>
+            @else
+            <form action="{{ route('usager.ticket.take') }}" method="POST">
+                @csrf
+                <input type="hidden" name="service_id" value="{{ $service->id }}">
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-semibold text-sm py-2.5 rounded-xl transition">
+                    🎫 Prendre un ticket
+                </button>
+            </form>
+            @endif
+        </div>
+        @endforeach
+    </div>
+    @endif
+</div>
+
+@endsection

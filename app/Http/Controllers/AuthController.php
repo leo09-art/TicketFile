@@ -65,11 +65,12 @@ class AuthController extends Controller
 
         User::create($validated);
 
+        // Si admin connecté → retour dashboard admin
         if (Auth::check() && Auth::user()->role === 'admin') {
-            return redirect()->route('dashboard.admin')->with('success', 'Compte cree avec succes.');
+            return redirect()->route('admin.users')->with('success', 'Compte créé avec succès.');
         }
 
-        return redirect()->route('login')->with('success', 'Compte cree avec succes.');
+        return redirect()->route('login')->with('success', 'Compte créé avec succès.');
     }
 
     public function logout(Request $request): \Illuminate\Http\RedirectResponse
