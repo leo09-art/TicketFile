@@ -81,3 +81,8 @@ Ouvre ensuite :
 ```text
 http://127.0.0.1:8000
 ```
+git checkout master
+git pull origin master
+git add .
+git commit -m "Ajout de mon travail"
+git push origin master
