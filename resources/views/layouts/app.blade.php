@@ -8,9 +8,8 @@
     <script>
         (function() {
             const t = localStorage.getItem('theme');
-            if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            }
+            const dark = t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.classList.toggle('dark', dark);
         })();
     </script>
 </head>
@@ -121,30 +120,6 @@
         </main>
     </div>
 </div>
-
-<script>
-    function applyTheme(dark) {
-        dark ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', dark ? 'dark' : 'light');
-        updateIcons();
-    }
-    function updateIcons() {
-        const isDark = document.documentElement.classList.contains('dark');
-        const icon = document.getElementById('theme-icon');
-        const label = document.getElementById('theme-label');
-        const iconMobile = document.getElementById('theme-icon-mobile');
-        if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-        if (label) label.textContent = isDark ? 'Mode clair' : 'Mode sombre';
-        if (iconMobile) iconMobile.textContent = isDark ? '☀️' : '🌙';
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        updateIcons();
-        const btn = document.getElementById('theme-toggle');
-        const btnM = document.getElementById('theme-toggle-mobile');
-        if (btn) btn.addEventListener('click', () => applyTheme(!document.documentElement.classList.contains('dark')));
-        if (btnM) btnM.addEventListener('click', () => applyTheme(!document.documentElement.classList.contains('dark')));
-    });
-</script>
 
 </body>
 </html>

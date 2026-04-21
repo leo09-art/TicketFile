@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Force dark:* utilities to follow the .dark class toggled by the app. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';

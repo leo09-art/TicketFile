@@ -11,6 +11,17 @@ use Illuminate\Support\Facades\Auth;
 
 class TicketController extends Controller
 {
+    private function statusLabel(string $status): string
+    {
+        return [
+            Ticket::STATUS_EN_ATTENTE => 'En attente',
+            Ticket::STATUS_APPELLE => 'Appelé',
+            Ticket::STATUS_TRAITE => 'Traité',
+            Ticket::STATUS_ABSENT => 'Absent',
+            Ticket::STATUS_ANNULE => 'Annulé',
+        ][$status] ?? $status;
+    }
+
     // Dashboard admin
     public function adminDashboard()
     {
@@ -26,6 +37,53 @@ class TicketController extends Controller
             ->take(10)
             ->get();
         return view('pages.admin.dashboard-admin', compact('stats', 'recentTickets'));
+    }
+
+    public function adminDashboardData()
+    {
+        $stats = [
+            'users' => User::count(),
+            'tickets' => Ticket::today()->count(),
+            'services' => Service::count(),
+            'counters' => Counter::count(),
+        ];
+
+        $recentTickets = Ticket::with(['service', 'user', 'counter'])
+            ->today()
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(function (Ticket $ticket) {
+                $duration = ($ticket->called_at && $ticket->treated_at)
+                    ? $ticket->called_at->diffInMinutes($ticket->treated_at) . ' min'
+                    : null;
+
+                return [
+                    'id' => $ticket->id,
+                    'ticket_number' => str_pad((string) $ticket->ticket_number, 3, '0', STR_PAD_LEFT),
+                    'user' => $ticket->user?->name ?? 'Invité',
+                    'service' => $ticket->service?->name ?? '—',
+                    'counter' => $ticket->counter?->name ?? '—',
+                    'status' => $ticket->status,
+                    'status_label' => $this->statusLabel($ticket->status),
+                    'created_at' => $ticket->created_at->format('H:i'),
+                    'duration' => $duration,
+                ];
+            })
+            ->values();
+
+        $statusTotals = [
+            'en_attente' => $recentTickets->where('status', Ticket::STATUS_EN_ATTENTE)->count(),
+            'appele' => $recentTickets->where('status', Ticket::STATUS_APPELLE)->count(),
+            'traite' => $recentTickets->where('status', Ticket::STATUS_TRAITE)->count(),
+            'absent' => $recentTickets->where('status', Ticket::STATUS_ABSENT)->count(),
+        ];
+
+        return response()->json([
+            'stats' => $stats,
+            'status_totals' => $statusTotals,
+            'recent_tickets' => $recentTickets,
+        ]);
     }
 
     // Dashboard agent
@@ -84,6 +142,93 @@ class TicketController extends Controller
         return view('pages.agent.dashboard-agent', compact(
             'counter', 'currentTicket', 'waitingTickets', 'absentTickets', 'todayStats', 'avgTreatmentTime'
         ));
+    }
+
+    public function agentDashboardData()
+    {
+        $counter = Counter::where('agent_user_id', Auth::id())->with('service')->first();
+
+        if (!$counter) {
+            return response()->json([
+                'counter' => null,
+                'current_ticket' => null,
+                'waiting_tickets' => [],
+                'absent_tickets' => [],
+                'today_stats' => ['traite' => 0, 'absent' => 0, 'en_attente' => 0],
+                'avg_treatment_time' => 0,
+            ]);
+        }
+
+        $currentTicket = Ticket::where('counter_id', $counter->id)
+            ->where('status', Ticket::STATUS_APPELLE)
+            ->today()
+            ->latest('called_at')
+            ->with(['service', 'user'])
+            ->first();
+
+        $waitingTickets = Ticket::where('service_id', $counter->service_id)
+            ->where('status', Ticket::STATUS_EN_ATTENTE)
+            ->today()
+            ->orderBy('ticket_number')
+            ->with(['service', 'user'])
+            ->get();
+
+        $absentTickets = Ticket::where('counter_id', $counter->id)
+            ->where('status', Ticket::STATUS_ABSENT)
+            ->today()
+            ->with('user')
+            ->get();
+
+        $treatedToday = Ticket::where('counter_id', $counter->id)
+            ->where('status', Ticket::STATUS_TRAITE)
+            ->today()
+            ->whereNotNull('called_at')
+            ->whereNotNull('treated_at')
+            ->get();
+
+        $avgTreatmentTime = $treatedToday->isNotEmpty()
+            ? round($treatedToday->avg(fn($t) => $t->called_at->diffInMinutes($t->treated_at)))
+            : 0;
+
+        $todayStats = [
+            'traite' => Ticket::where('counter_id', $counter->id)->where('status', Ticket::STATUS_TRAITE)->today()->count(),
+            'absent' => Ticket::where('counter_id', $counter->id)->where('status', Ticket::STATUS_ABSENT)->today()->count(),
+            'en_attente' => Ticket::where('service_id', $counter->service_id)->where('status', Ticket::STATUS_EN_ATTENTE)->today()->count(),
+        ];
+
+        return response()->json([
+            'counter' => [
+                'id' => $counter->id,
+                'name' => $counter->name,
+                'service_name' => $counter->service?->name,
+            ],
+            'current_ticket' => $currentTicket ? [
+                'id' => $currentTicket->id,
+                'ticket_number' => str_pad((string) $currentTicket->ticket_number, 3, '0', STR_PAD_LEFT),
+                'service_name' => $currentTicket->service?->name,
+                'user_name' => $currentTicket->user?->name ?? 'Invité',
+                'called_at' => $currentTicket->called_at?->format('H:i'),
+                'called_at_ts' => $currentTicket->called_at?->timestamp,
+                'treated_url' => route('agent.ticket.treated', $currentTicket),
+                'absent_url' => route('agent.ticket.absent', $currentTicket),
+            ] : null,
+            'waiting_tickets' => $waitingTickets->map(fn(Ticket $ticket) => [
+                'id' => $ticket->id,
+                'ticket_number' => str_pad((string) $ticket->ticket_number, 3, '0', STR_PAD_LEFT),
+                'user_name' => $ticket->user?->name ?? 'Invité',
+                'created_at' => $ticket->created_at->format('H:i'),
+                'wait_minutes' => $ticket->created_at->diffInMinutes(now()),
+            ])->values(),
+            'absent_tickets' => $absentTickets->map(fn(Ticket $ticket) => [
+                'id' => $ticket->id,
+                'ticket_number' => str_pad((string) $ticket->ticket_number, 3, '0', STR_PAD_LEFT),
+                'user_name' => $ticket->user?->name ?? 'Invité',
+                'updated_at' => $ticket->updated_at->format('H:i'),
+                'recall_url' => route('agent.ticket.recall', $ticket),
+            ])->values(),
+            'today_stats' => $todayStats,
+            'avg_treatment_time' => $avgTreatmentTime,
+        ]);
     }
 
     // Appeler le ticket suivant
@@ -151,7 +296,7 @@ class TicketController extends Controller
         $services = Service::active()
             ->whereIn('id', $serviceIdsWithCounter)
             ->get()
-            ->map(function ($s) {
+            ->map(function (Service $s) {
                 $s->waiting = $s->tickets()->where('status', Ticket::STATUS_EN_ATTENTE)->today()->count();
                 return $s;
             });
@@ -164,6 +309,43 @@ class TicketController extends Controller
             ->first();
 
         return view('pages.users.dashboard-user', compact('services', 'myTicket'));
+    }
+
+    public function usagerDashboardData()
+    {
+        $serviceIdsWithCounter = Counter::whereNotNull('agent_user_id')->pluck('service_id')->unique();
+
+        $services = Service::active()
+            ->whereIn('id', $serviceIdsWithCounter)
+            ->get()
+            ->map(function (Service $s) {
+                return [
+                    'id' => $s->id,
+                    'name' => $s->name,
+                    'description' => $s->description,
+                    'waiting' => $s->tickets()->where('status', Ticket::STATUS_EN_ATTENTE)->today()->count(),
+                ];
+            })
+            ->values();
+
+        $myTicket = Ticket::where('user_id', Auth::id())
+            ->today()
+            ->whereIn('status', [Ticket::STATUS_EN_ATTENTE, Ticket::STATUS_APPELLE])
+            ->with('service')
+            ->latest()
+            ->first();
+
+        return response()->json([
+            'services' => $services,
+            'my_ticket' => $myTicket ? [
+                'id' => $myTicket->id,
+                'ticket_number' => str_pad((string) $myTicket->ticket_number, 3, '0', STR_PAD_LEFT),
+                'service_name' => $myTicket->service?->name,
+                'status' => $myTicket->status,
+                'status_label' => $this->statusLabel($myTicket->status),
+                'tracking_url' => route('usager.ticket', $myTicket->id),
+            ] : null,
+        ]);
     }
 
     // Prendre un ticket
@@ -202,10 +384,36 @@ class TicketController extends Controller
     // Suivi ticket usager
     public function ticketSuivi(Ticket $ticket)
     {
+        if ($ticket->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         $ticket->load('service', 'counter');
         $position = $ticket->getPositionInQueue();
         $estimatedTime = $position * 5;
         return view('pages.users.ticket-suivi', compact('ticket', 'position', 'estimatedTime'));
+    }
+
+    public function ticketSuiviData(Ticket $ticket)
+    {
+        if ($ticket->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $ticket->load('service', 'counter');
+        $position = $ticket->getPositionInQueue();
+        $estimatedTime = $position * 5;
+
+        return response()->json([
+            'ticket_number' => str_pad((string) $ticket->ticket_number, 3, '0', STR_PAD_LEFT),
+            'service_name' => $ticket->service?->name,
+            'counter_name' => $ticket->counter?->name,
+            'status' => $ticket->status,
+            'status_label' => $this->statusLabel($ticket->status),
+            'position' => $position,
+            'estimated_time' => $estimatedTime,
+            'can_cancel' => $ticket->status === Ticket::STATUS_EN_ATTENTE && $ticket->user_id === Auth::id(),
+        ]);
     }
 
     // Annuler ticket

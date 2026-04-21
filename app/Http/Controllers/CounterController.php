@@ -6,22 +6,46 @@ use App\Models\Counter;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CounterController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $counters = Counter::with(['service', 'agent'])->get();
+        $selectedServiceId = $request->get('service_id');
+        $sort = $request->get('sort', 'created_desc');
+
+        $counters = Counter::query()
+            ->with(['service', 'agent'])
+            ->when($selectedServiceId, fn($q) => $q->where('service_id', $selectedServiceId))
+            ->when($sort === 'created_asc', fn($q) => $q->orderBy('created_at'))
+            ->when($sort !== 'created_asc', fn($q) => $q->orderByDesc('created_at'))
+            ->get();
+
         $services = Service::active()->get();
-        $agents   = User::where('role', 'agent')->get();
-        return view('pages.admin.counters', compact('counters', 'services', 'agents'));
+    $agents   = User::where('role', 'agent')->withCount('counters')->get();
+
+        return view('pages.admin.counters', [
+            'counters' => $counters,
+            'services' => $services,
+            'agents' => $agents,
+            'selectedServiceId' => $selectedServiceId,
+            'sort' => $sort,
+        ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name'       => 'required|string|max:255',
-            'service_id' => 'required|exists:services,id',
+            'name'          => 'required|string|max:255',
+            'service_id'    => 'required|exists:services,id',
+            'agent_user_id' => [
+                'nullable',
+                'exists:users,id',
+                Rule::unique('counters', 'agent_user_id'),
+            ],
+        ], [
+            'agent_user_id.unique' => 'Cet agent est déjà assigné à un autre guichet.',
         ]);
 
         Counter::create([
@@ -31,6 +55,29 @@ class CounterController extends Controller
         ]);
 
         return back()->with('success', 'Guichet créé avec succès.');
+    }
+
+    public function update(Request $request, Counter $counter)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'service_id' => 'required|exists:services,id',
+            'agent_user_id' => [
+                'nullable',
+                'exists:users,id',
+                Rule::unique('counters', 'agent_user_id')->ignore($counter->id),
+            ],
+        ], [
+            'agent_user_id.unique' => 'Cet agent est déjà assigné à un autre guichet.',
+        ]);
+
+        $counter->update([
+            'name' => $validated['name'],
+            'service_id' => $validated['service_id'],
+            'agent_user_id' => $validated['agent_user_id'] ?? null,
+        ]);
+
+        return back()->with('success', 'Guichet modifié avec succès.');
     }
 
     public function destroy(Counter $counter)
