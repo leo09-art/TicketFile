@@ -52,6 +52,13 @@
 </form>
 
 <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm ring-1 ring-gray-200 dark:ring-gray-800 overflow-hidden">
+    @php
+        $roleClasses = [
+            'admin' => 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400',
+            'agent' => 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400',
+            'usager' => 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400',
+        ];
+    @endphp
     <table class="w-full text-sm">
         <thead class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
             <tr>
@@ -75,10 +82,7 @@
                 </td>
                 <td class="px-6 py-4 text-gray-500 dark:text-gray-400 text-xs">{{ $user->email }}</td>
                 <td class="px-6 py-4">
-                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold
-                        @if($user->role === 'admin') bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400
-                        @elseif($user->role === 'agent') bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400
-                        @else bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 @endif">
+                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $roleClasses[$user->role] ?? 'bg-gray-100 text-gray-600' }}">
                         {{ ucfirst($user->role) }}
                     </span>
                 </td>
@@ -87,7 +91,7 @@
                     @if($user->id !== Auth::id())
                     <div class="flex items-center gap-3">
                         <button type="button"
-                            onclick="document.getElementById('modal-edit-user-{{ $user->id }}').classList.remove('hidden')"
+                            onclick="document.getElementById('modal-edit-user-{{ $user->id }}').style.display='flex'"
                             class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold transition">Modifier</button>
                         <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
                             onsubmit="return confirm('Supprimer {{ $user->name }} ?')">
@@ -97,7 +101,7 @@
                     </div>
                     @else
                     <button type="button"
-                        onclick="document.getElementById('modal-edit-user-{{ $user->id }}').classList.remove('hidden')"
+                        onclick="document.getElementById('modal-edit-user-{{ $user->id }}').style.display='flex'"
                         class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold transition">Modifier</button>
                     @endif
                 </td>
@@ -112,11 +116,11 @@
 </div>
 
 @foreach($users as $user)
-<div id="modal-edit-user-{{ $user->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+<div id="modal-edit-user-{{ $user->id }}" style="display:none" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
     <div class="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-7 ring-1 ring-gray-200 dark:ring-gray-700">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-lg font-black text-gray-900 dark:text-white">Modifier l'utilisateur</h2>
-            <button type="button" onclick="document.getElementById('modal-edit-user-{{ $user->id }}').classList.add('hidden')"
+            <button type="button" onclick="document.getElementById('modal-edit-user-{{ $user->id }}').style.display='none'"
                 class="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 transition text-lg">&times;</button>
         </div>
         <form method="POST" action="{{ route('admin.users.update', $user) }}" class="space-y-4">
@@ -141,8 +145,24 @@
                     <option value="usager" {{ $user->role === 'usager' ? 'selected' : '' }}>Usager</option>
                 </select>
             </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Guichet assigné</label>
+                <select name="counter_id"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition cursor-pointer">
+                    <option value="">-- Aucun guichet --</option>
+                    @php $currentCounterId = $user->counters->first()?->id; @endphp
+                    @foreach($counters as $counter)
+                        @if($counter->agent_user_id === null || $counter->agent_user_id === $user->id)
+                        <option value="{{ $counter->id }}" {{ $currentCounterId === $counter->id ? 'selected' : '' }}>
+                            {{ $counter->name }}{{ $counter->agent_user_id === $user->id ? ' (actuel)' : '' }}
+                        </option>
+                        @endif
+                    @endforeach
+                </select>
+                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Laisser vide retire l'agent de tout guichet.</p>
+            </div>
             <div class="flex gap-3 pt-2">
-                <button type="button" onclick="document.getElementById('modal-edit-user-{{ $user->id }}').classList.add('hidden')"
+                <button type="button" onclick="document.getElementById('modal-edit-user-{{ $user->id }}').style.display='none'"
                     class="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-300 transition">Annuler</button>
                 <button type="submit"
                     class="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition">Enregistrer</button>

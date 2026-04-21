@@ -6,6 +6,7 @@ use App\Models\Counter;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CounterController extends Controller
 {
@@ -22,7 +23,7 @@ class CounterController extends Controller
             ->get();
 
         $services = Service::active()->get();
-        $agents   = User::where('role', 'agent')->get();
+    $agents   = User::where('role', 'agent')->withCount('counters')->get();
 
         return view('pages.admin.counters', [
             'counters' => $counters,
@@ -36,8 +37,15 @@ class CounterController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'       => 'required|string|max:255',
-            'service_id' => 'required|exists:services,id',
+            'name'          => 'required|string|max:255',
+            'service_id'    => 'required|exists:services,id',
+            'agent_user_id' => [
+                'nullable',
+                'exists:users,id',
+                Rule::unique('counters', 'agent_user_id'),
+            ],
+        ], [
+            'agent_user_id.unique' => 'Cet agent est déjà assigné à un autre guichet.',
         ]);
 
         Counter::create([
@@ -54,7 +62,13 @@ class CounterController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'service_id' => 'required|exists:services,id',
-            'agent_user_id' => 'nullable|exists:users,id',
+            'agent_user_id' => [
+                'nullable',
+                'exists:users,id',
+                Rule::unique('counters', 'agent_user_id')->ignore($counter->id),
+            ],
+        ], [
+            'agent_user_id.unique' => 'Cet agent est déjà assigné à un autre guichet.',
         ]);
 
         $counter->update([
