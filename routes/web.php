@@ -32,14 +32,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     Route::get('/services',              [ServiceController::class, 'index'])->name('services');
     Route::post('/services',             [ServiceController::class, 'store'])->name('services.store');
+    Route::patch('/services/{service}',  [ServiceController::class, 'update'])->name('services.update');
     Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->name('services.destroy');
 
     Route::get('/counters',              [CounterController::class, 'index'])->name('counters');
     Route::post('/counters',             [CounterController::class, 'store'])->name('counters.store');
+    Route::patch('/counters/{counter}',  [CounterController::class, 'update'])->name('counters.update');
     Route::delete('/counters/{counter}', [CounterController::class, 'destroy'])->name('counters.destroy');
     Route::patch('/counters/{counter}/toggle', [CounterController::class, 'toggle'])->name('counters.toggle');
 
     Route::get('/users',           [UserController::class, 'index'])->name('users');
+    Route::patch('/users/{user}',  [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
