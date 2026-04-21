@@ -38,7 +38,16 @@
 </div>
 @endif
 
-<div class="grid gap-5 lg:grid-cols-[1fr_260px]">
+@php
+    $agentSnapshot = json_encode([
+        'current_ticket' => $currentTicket?->id,
+        'waiting_count' => $waitingTickets->count(),
+        'absent_count' => $absentTickets->count(),
+        'stats' => $todayStats,
+    ]);
+@endphp
+
+<div id="agent-live-root" data-endpoint="{{ route('agent.dashboard.data') }}" data-snapshot='{{ $agentSnapshot }}' class="grid gap-5 lg:grid-cols-[1fr_260px]">
     <div class="space-y-5">
 
         {{-- Ticket en cours --}}
@@ -229,11 +238,9 @@
             <p class="text-sm text-indigo-300 dark:text-gray-300 mt-1">{{ $counter->service?->name ?? '—' }}</p>
         </div>
 
-        <p class="text-center text-xs text-gray-400 dark:text-gray-500">Actualisation auto toutes les 20s</p>
+        <p class="text-center text-xs text-gray-400 dark:text-gray-500">Mise à jour en temps réel (toutes les 5 secondes)</p>
     </div>
 </div>
-
-<meta http-equiv="refresh" content="20">
 
 <script>
 const el = document.getElementById('elapsed-time');
@@ -278,6 +285,36 @@ if (el) {
     tick();
     setInterval(tick, 1000);
 }
+
+(() => {
+    const root = document.getElementById('agent-live-root');
+    if (!root) return;
+
+    const endpoint = root.dataset.endpoint;
+    let lastSnapshot = root.dataset.snapshot || null;
+
+    async function checkAgentUpdates() {
+        const response = await fetch(endpoint, { headers: { 'Accept': 'application/json' } });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const snapshot = JSON.stringify({
+            current_ticket: data.current_ticket ? data.current_ticket.id : null,
+            waiting_count: data.waiting_tickets.length,
+            absent_count: data.absent_tickets.length,
+            stats: data.today_stats,
+        });
+
+        if (lastSnapshot && snapshot !== lastSnapshot) {
+            window.location.reload();
+            return;
+        }
+
+        lastSnapshot = snapshot;
+    }
+
+    setInterval(checkAgentUpdates, 5000);
+})();
 </script>
 
 @endif

@@ -23,14 +23,14 @@
 @endif
 
 @if($myTicket)
-<div class="mb-6 bg-indigo-600 rounded-2xl p-6 text-white flex items-center justify-between gap-4 flex-wrap">
+<div id="my-ticket-banner" class="mb-6 bg-indigo-600 rounded-2xl p-6 text-white flex items-center justify-between gap-4 flex-wrap">
     <div>
         <p class="text-xs font-semibold text-indigo-300 uppercase tracking-widest mb-1">Votre ticket actif</p>
-        <p class="text-5xl font-black leading-none">#{{ str_pad($myTicket->ticket_number, 3, '0', STR_PAD_LEFT) }}</p>
-        <p class="text-sm text-indigo-200 mt-2">{{ $myTicket->service->name }}</p>
+        <p id="my-ticket-number" class="text-5xl font-black leading-none">#{{ str_pad($myTicket->ticket_number, 3, '0', STR_PAD_LEFT) }}</p>
+        <p id="my-ticket-service" class="text-sm text-indigo-200 mt-2">{{ $myTicket->service->name }}</p>
     </div>
     <div class="flex flex-col gap-2">
-        <a href="{{ route('usager.ticket', $myTicket->id) }}"
+        <a id="my-ticket-link" href="{{ route('usager.ticket', $myTicket->id) }}"
            class="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold text-sm px-4 py-2.5 rounded-xl hover:bg-indigo-50 transition">
             👁️ Suivre mon ticket
         </a>
@@ -44,7 +44,7 @@
 </div>
 @endif
 
-<div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm ring-1 ring-gray-200 dark:ring-gray-800 overflow-hidden">
+<div id="user-dashboard-live-root" data-endpoint="{{ route('usager.dashboard.data') }}" class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm ring-1 ring-gray-200 dark:ring-gray-800 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
         <h2 class="font-bold text-gray-900 dark:text-white">Services disponibles</h2>
         <p class="text-xs text-gray-400 mt-0.5">Choisissez un service pour prendre un ticket</p>
@@ -67,7 +67,7 @@
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     <span class="inline-flex items-center gap-1">
                         <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
-                        {{ $service->waiting }} en attente
+                        <span class="service-waiting" data-service-id="{{ $service->id }}">{{ $service->waiting }}</span> en attente
                     </span>
                 </p>
             </div>
@@ -89,5 +89,51 @@
     </div>
     @endif
 </div>
+
+<script>
+(() => {
+    const root = document.getElementById('user-dashboard-live-root');
+    if (!root) return;
+
+    const endpoint = root.dataset.endpoint;
+
+    async function refreshUserDashboard() {
+        const response = await fetch(endpoint, { headers: { 'Accept': 'application/json' } });
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        const waitingNodes = document.querySelectorAll('.service-waiting');
+        waitingNodes.forEach((node) => {
+            const serviceId = Number(node.dataset.serviceId);
+            const service = data.services.find((s) => s.id === serviceId);
+            if (service) {
+                node.textContent = service.waiting;
+            }
+        });
+
+        const banner = document.getElementById('my-ticket-banner');
+        if (!banner) {
+            if (data.my_ticket && data.my_ticket.tracking_url) {
+                window.location.reload();
+            }
+            return;
+        }
+
+        if (!data.my_ticket) {
+            banner.classList.add('hidden');
+            return;
+        }
+
+        banner.classList.remove('hidden');
+        document.getElementById('my-ticket-number').textContent = `#${data.my_ticket.ticket_number}`;
+        document.getElementById('my-ticket-service').textContent = data.my_ticket.service_name || '—';
+        document.getElementById('my-ticket-link').setAttribute('href', data.my_ticket.tracking_url);
+    }
+
+    refreshUserDashboard();
+    setInterval(refreshUserDashboard, 5000);
+})();
+</script>
 
 @endsection

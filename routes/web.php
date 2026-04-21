@@ -29,6 +29,7 @@ Route::get('/tickets/{ticket}',[TicketController::class, 'show'])->name('tickets
 // Admin
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [TicketController::class, 'adminDashboard'])->name('dashboard');
+    Route::get('/dashboard/data', [TicketController::class, 'adminDashboardData'])->name('dashboard.data');
 
     Route::get('/services',              [ServiceController::class, 'index'])->name('services');
     Route::post('/services',             [ServiceController::class, 'store'])->name('services.store');
@@ -49,6 +50,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 // Agent
 Route::prefix('agent')->name('agent.')->middleware(['auth', 'role:agent'])->group(function () {
     Route::get('/dashboard',                      [TicketController::class, 'agentDashboard'])->name('dashboard');
+    Route::get('/dashboard/data',                 [TicketController::class, 'agentDashboardData'])->name('dashboard.data');
     Route::post('/counter/{counter}/call-next',   [TicketController::class, 'callNext'])->name('call-next');
     Route::patch('/ticket/{ticket}/treated',      [TicketController::class, 'markTreated'])->name('ticket.treated');
     Route::patch('/ticket/{ticket}/absent',       [TicketController::class, 'markAbsent'])->name('ticket.absent');
@@ -58,8 +60,10 @@ Route::prefix('agent')->name('agent.')->middleware(['auth', 'role:agent'])->grou
 // Usager
 Route::prefix('usager')->name('usager.')->middleware(['auth', 'role:usager'])->group(function () {
     Route::get('/dashboard',               [TicketController::class, 'usagerDashboard'])->name('dashboard');
+    Route::get('/dashboard/data',          [TicketController::class, 'usagerDashboardData'])->name('dashboard.data');
     Route::post('/ticket/take',            [TicketController::class, 'take'])->name('ticket.take');
     Route::get('/ticket/{ticket}',         [TicketController::class, 'ticketSuivi'])->name('ticket');
+    Route::get('/ticket/{ticket}/data',    [TicketController::class, 'ticketSuiviData'])->name('ticket.data');
     Route::patch('/ticket/{ticket}/cancel',[TicketController::class, 'cancel'])->name('ticket.cancel');
 });
 
